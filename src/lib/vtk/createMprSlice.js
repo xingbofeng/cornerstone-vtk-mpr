@@ -11,10 +11,10 @@ import vtkImageReslice from 'vtk.js/Sources/Imaging/Core/ImageReslice';
  * @param {Object} [options={}]
  * @param {String} [options.imageOrientationPatient]
  * @param {String} [options.imagePositionPatient]
- * 
+ *
  * @returns {Object} - {slice, metaData}
  */
-export default function(vtkVolume, options = {}){
+export default function (vtkVolume, options = {}) {
     // Input
     const vtkImageData = vtkVolume.vtkImageData;
     const iop = options.imageOrientationPatient || "1,0,0,0,1,0";
@@ -24,22 +24,18 @@ export default function(vtkVolume, options = {}){
     const iopArray = iop.split(',').map(parseFloat);
     const rowCosinesVec3 = vec3.fromValues(iopArray[0], iopArray[1], iopArray[2]);
     const colCosinesVec3 = vec3.fromValues(iopArray[3], iopArray[4], iopArray[5]);
-    const ippVec3 = ipp === "center"
-        ? vtkVolume.centerIpp
-        : ipp.split(',').map(parseFloat)
+    const ippVec3 = ipp.split(',').map(parseFloat);
 
-    let zedCosinesVec3 = vec3.create()
+    let zedCosinesVec3 = vec3.create();
     vec3.cross(zedCosinesVec3, rowCosinesVec3, colCosinesVec3);
-    
+
     const [x0, y0, z0] = vtkImageData.getOrigin();
     const [xSpacing, ySpacing, zSpacing] = vtkImageData.getSpacing();
     const [xMin, xMax, yMin, yMax, zMin, zMax] = vtkImageData.getExtent();
-    
+
     //const xStart = x0 + xSpacing * (xMax - xMin);
     //const yStart = y0 + ySpacing * (yMax - yMin);
     const zStart = z0 + zSpacing * (zMax - zMin); // Inverted z for vtk??
-    console.log(zStart)
-    console.log(z0, zSpacing, zMax, zMin)
 
     // const centerOfVolume = vec3.fromValues(
     //     x0 + xSpacing * 0.5 * (xMin + xMax),
@@ -53,8 +49,6 @@ export default function(vtkVolume, options = {}){
     // This is the zAxis we set as the volume origin in `createVtkVolumeAsync`
     // NOTE: Applying rotation of 360 degrees to sagittal and coronal fixes reference lines
     // IE. clicking the blue handle 36 times.
-    console.log('~~ pre: ', ippVec3)
-    console.log('~~ zed: ', zedCosinesVec3.join())
     const position = vec3.fromValues(
         (zedCosinesVec3[0] * -1 * (ippVec3[0] - x0)) + x0,
         (zedCosinesVec3[1] * (ippVec3[1] - y0)) + y0,
@@ -64,13 +58,11 @@ export default function(vtkVolume, options = {}){
     //     zedCosinesVec3[0] * -1 * ippVec3[0],
     //     zedCosinesVec3[1] * ippVec3[1],
     //     zStart + zedCosinesVec3[2] * (ippVec3[2] - zStart))
-    console.log('~~ pst: ', position)
-    console.log('~~~~~');
 
     // Maths
     // TODO: MetaDataProvider to grab `volumeSpacing` and `volumeExtent` for a given volume?
     const axes = _calculateRotationAxes(rowCosinesVec3, colCosinesVec3, position);
-    
+
     // Setup vtkImageReslice
     const imageReslice = vtkImageReslice.newInstance();
     imageReslice.setInputData(vtkImageData);                // Our volume
@@ -83,7 +75,6 @@ export default function(vtkVolume, options = {}){
     const spacing = outputSlice.getSpacing();
     const dimensions = outputSlice.getDimensions();
     const bounds = outputSlice.getBounds();
-    console.log(spacing, dimensions, bounds)
 
     const result = {
         slice: outputSlice,
@@ -98,6 +89,7 @@ export default function(vtkVolume, options = {}){
                 columnCosines: [axes[4], axes[5], axes[6]],
                 rowPixelSpacing: spacing[1],
                 columnPixelSpacing: spacing[0],
+                sliceThickness: spacing[2],
                 frameOfReferenceUID: "THIS-CAN-BE-ALMOST-ANYTHING",
                 columns: dimensions[0],
                 rows: dimensions[1]
@@ -107,26 +99,26 @@ export default function(vtkVolume, options = {}){
 
     return result;
 }
-  
+
 
 /**
  * Creates a 4x4 matrix that vtk can use as a "rotation matrix". The values
  * correspond to:
- * 
+ *
  * ux, uy, uz, 0
  * vx, vy, vz, 0
  * wx, wy, wz, 0
  * px, py, pz, 1
- * 
+ *
  * ux, uy, uz, vx, vy, vz - "ImageOrientationPatient"
  * w - cross_product(u,v)
  * px, py, pz - "ImagePositionPatient"
- * 
+ *
  * ImagePositionPatient: [60.3642578125, 170.3642578125, -32]
  * ImageOrientationPatient: [-1, 0, 0, 0, -1, 0]
  * RowCosines: [-1, 0, 0]
  * ColumnCosines: [0, -1, 0]
- * 
+ *
  * Reference: https://public.kitware.com/pipermail/vtkusers/2012-November/077297.html
  * Reference: http://nipy.org/nibabel/dicom/dicom_orientation.html
  *
@@ -135,7 +127,7 @@ export default function(vtkVolume, options = {}){
  * @param {Float32Array} ippArray
  * @returns {Mat4} - 4x4 Rotation Matrix
  */
-function _calculateRotationAxes(rowCosines, colCosines, ippArray){
+function _calculateRotationAxes(rowCosines, colCosines, ippArray) {
     let wCrossProd = vec3.create()
     vec3.cross(wCrossProd, rowCosines, colCosines);
 

@@ -1,4 +1,6 @@
 # cornerstone-vtk-mpr
+基于cornerstone-vtk-mpr更好地实现基于cornerstone的三维重建，实际上是一个vtk-image-loader
+具体使用demo可见[example.js](./src/example.js)
 
 ## Commands
 

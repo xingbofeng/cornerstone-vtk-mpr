@@ -15,9 +15,8 @@ export default function(imageId){
     return imageLoadObject;
 }
 
-async function createImage(imageId){
-    // console.log('MPR IMAGE ID: ', imageId);
-    const [scheme, seriesNumber, imageOrientationPatient, imagePositionPatient] = imageId.split(':');
+export async function createImage(imageId){
+    const [scheme, seriesNumber, imageOrientationPatient, imagePositionPatient, orientation] = imageId.split(':');
     const vtkVolume = await tryGetVtkVolumeForSeriesNumber(seriesNumber);
 
     const createSliceResult = createMprSlice(vtkVolume, { imageOrientationPatient, imagePositionPatient });
@@ -40,11 +39,12 @@ async function createImage(imageId){
         maxPixelValue: mappedSlice.maxPixelValue,
         sizeInBytes: mappedSlice.sizeInBytes,
         slope: 1,
-        windowCenter:  mappedSlice.windowCenter, 
+        windowCenter:  mappedSlice.windowCenter,
         windowWidth: mappedSlice.windowWidth,
         decodeTimeInMS: 0,
         floatPixelData: undefined,
         isMpr: true,
+        orientation,
       };
 
     // set the ww/wc to cover the dynamic range of the image if no values are supplied
@@ -56,12 +56,10 @@ async function createImage(imageId){
         image.windowCenter = (maxVoi + minVoi) / 2
     }
 
-    // console.log('~~ CREATE IMAGE: ', image)
 
     return image;
 }
 
   function _createMprMetaData(imageId, metaData){
-    // console.log(metaData);
     mprMetaDataStore.set(imageId, metaData);
   }

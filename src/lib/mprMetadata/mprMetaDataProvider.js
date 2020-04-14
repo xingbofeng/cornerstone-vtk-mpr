@@ -4,12 +4,12 @@ import mprMetaDataStore from './mprMetaDataStore.js';
 
 function provider(moduleName, imageId) {
     const meta = mprMetaDataStore.get(imageId);
-    
-    if(!meta){
+
+    if (!meta) {
         return;
     }
 
-    if(moduleName === "imagePlaneModule"){
+    if (moduleName === "imagePlaneModule") {
         const imagePlaneModule = meta.imagePlaneModule;
         return imagePlaneModule;
     }

@@ -7,7 +7,7 @@ const vtkRules = require('vtk.js/Utilities/config/dependency.js').webpack.core
 const cssRules = require('vtk.js/Utilities/config/dependency.js').webpack.css
   .rules
 
-const entry = path.join(__dirname, './src/index.js')
+const entry = path.join(__dirname, './src/example.js')
 const sourcePath = path.join(__dirname, './src')
 const outputPath = path.resolve(__dirname, 'public')
 
@@ -52,6 +52,6 @@ module.exports = {
   devServer: {
     contentBase: path.join(__dirname, 'public'),
     compress: false,
-    port: 9000
+    port: 2222
   }
 }

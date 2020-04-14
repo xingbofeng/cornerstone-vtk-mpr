@@ -1,4 +1,4 @@
-import { getEnabledElement } from 'cornerstone-core/dist/cornerstone.js'
+import external from './../externalModules.js';
 
 /**
  * Waits a set amount of time, then resolves. Can be chained off of to delay
@@ -20,7 +20,7 @@ export const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
  */
 export function waitForEnabledElementImageToLoad(element) {
   try {
-    const enabledElement = getEnabledElement(element)
+    const enabledElement = external.cornerstone.getEnabledElement(element)
 
     if (!enabledElement.image) {
       return wait(250).then(() => waitForEnabledElementImageToLoad(element))

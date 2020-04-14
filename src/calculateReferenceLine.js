@@ -1,7 +1,4 @@
-import { import as csTools } from 'cornerstone-tools';
-
-const planePlaneIntersection = csTools('util/planePlaneIntersection');
-const projectPatientPointToImagePlane = csTools('util/projectPatientPointToImagePlane');
+import external from './externalModules.js';
 
   /**
    * Calculates a reference line between two planes by projecting the top left hand corner and bottom right hand corner
@@ -17,8 +14,10 @@ const projectPatientPointToImagePlane = csTools('util/projectPatientPointToImage
    * @returns {Object}  The start and end points of the line to be drawn.
    */
   export default function(targetImagePlane, referenceImagePlane) {
+    const planePlaneIntersection = external.cornerstoneTools.import('util/planePlaneIntersection');
+    const projectPatientPointToImagePlane = external.cornerstoneTools.import('util/projectPatientPointToImagePlane');
     const patientPoint = planePlaneIntersection(targetImagePlane, referenceImagePlane);
-  
+
     if (!patientPoint) {
       return;
     }
@@ -31,4 +30,3 @@ const projectPatientPointToImagePlane = csTools('util/projectPatientPointToImage
       end,
     };
   }
-  

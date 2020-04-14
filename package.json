@@ -28,7 +28,7 @@
     "dicom-parser": "1.8.3",
     "gl-matrix": "3.0.0",
     "hammerjs": "2.0.8",
-    "vtk.js": "8.3.9"
+    "vtk.js": "13.11.1"
   },
   "devDependencies": {
     "@babel/core": "7.2.2",

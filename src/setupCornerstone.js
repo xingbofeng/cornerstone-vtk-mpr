@@ -1,84 +1,71 @@
 // Song & dance
 import Hammer from "hammerjs";
 import dicomParser from "dicom-parser";
-import * as cornerstone from "cornerstone-core";
-import * as cornerstoneMath from "cornerstone-math";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
-import * as cornerstoneTools from "cornerstone-tools";
+import external from './externalModules.js';
 
-//
 import appState from './appState.js';
-import getUrlForImageId from './lib/getUrlForImageId.js';
 import mprMetaDataProvider from './lib/mprMetadata/mprMetaDataProvider.js';
 import mprImageLoader from './mprImageLoader.js'
-import MprTool from './MprTool.js';
-import MprMouseWheelTool from './MprMouseWheelTool.js';
+import getMprTool from './getMprTool.js';
+import getMprMouseWheelTool from './getMprMouseWheelTool.js';
 
 export default function(seriesNumber) {
-
     _setPeerDependencies();
     _initWadoImageLoader();
     _initCornerstoneTools();
-    cornerstone.registerImageLoader('mpr', mprImageLoader);
-    cornerstone.metaData.addProvider(mprMetaDataProvider);
+    external.cornerstone.registerImageLoader('mpr', mprImageLoader);
+    external.cornerstone.metaData.addProvider(mprMetaDataProvider);
 
     // Enable Elements
     const originalSeriesElement = document.getElementById("cornerstone-target");
     const mprAxialSeriesElement = document.getElementById("axial-target");
     const mprCoronalSeriesElement = document.getElementById("coronal-target");
     const mprSagittalSeriesElement = document.getElementById("sagittal-target");
-    
-    cornerstone.enable(originalSeriesElement, {
+
+    external.cornerstone.enable(originalSeriesElement, {
         renderer: "webgl"
     });
 
-    cornerstone.enable(mprAxialSeriesElement, {
+    external.cornerstone.enable(mprAxialSeriesElement, {
         renderer: "webgl"
     });
 
-    cornerstone.enable(mprCoronalSeriesElement, {
+    external.cornerstone.enable(mprCoronalSeriesElement, {
         renderer: "webgl"
     });
 
-    cornerstone.enable(mprSagittalSeriesElement, {
+    external.cornerstone.enable(mprSagittalSeriesElement, {
         renderer: "webgl"
     });
 
     _setOriginalSeriesStackState(seriesNumber, originalSeriesElement);
 
-    cornerstoneTools.addToolForElement(mprAxialSeriesElement, MprTool, {
-        configuration: { rotationAxis: 'Y' }
-    });
-    cornerstoneTools.addToolForElement(mprCoronalSeriesElement, MprTool, {
-        configuration: { rotationAxis: 'X' }
-    });
-    cornerstoneTools.addToolForElement(mprSagittalSeriesElement, MprTool, {
-        configuration: { rotationAxis: 'X' }
-    });
+    const MprTool = getMprTool();
 
-    // Track data for this tool using STACK state
-    cornerstoneTools.addStackStateManager(mprAxialSeriesElement, ["Mpr"])
-    cornerstoneTools.addStackStateManager(mprCoronalSeriesElement, ["Mpr"])
-    cornerstoneTools.addStackStateManager(mprSagittalSeriesElement, ["Mpr"])
+    // external.cornerstoneTools.addToolForElement(originalSeriesElement, MprTool);
+    external.cornerstoneTools.addToolForElement(mprAxialSeriesElement, MprTool);
+    external.cornerstoneTools.addToolForElement(mprCoronalSeriesElement, MprTool);
+    external.cornerstoneTools.addToolForElement(mprSagittalSeriesElement, MprTool);
 
-    // Element Specific Tools
-    cornerstoneTools.setToolActiveForElement(originalSeriesElement, "StackScrollMouseWheel", {});
-    //
-    cornerstoneTools.setToolActiveForElement(mprAxialSeriesElement, "MprMouseWheel", {});
-    cornerstoneTools.setToolActiveForElement(mprCoronalSeriesElement, "MprMouseWheel", {});
-    cornerstoneTools.setToolActiveForElement(mprSagittalSeriesElement, "MprMouseWheel", {});
-    //
-    cornerstoneTools.setToolActiveForElement(mprAxialSeriesElement, "Mpr", { mouseButtonMask: 1, color: '#9ACD32', cosines: "1,0,0,0,1,0" });
-    cornerstoneTools.setToolActiveForElement(mprCoronalSeriesElement, "Mpr", { mouseButtonMask: 1, color: '#0496FF', cosines: "1,0,0,0,0,-1" });
-    cornerstoneTools.setToolActiveForElement(mprSagittalSeriesElement, "Mpr", { mouseButtonMask: 1, color: '#EFBDEB', cosines: "0,1,0,0,0,-1" });
+
+    // external.cornerstoneTools.setToolActiveForElement(originalSeriesElement, "MprMouseWheel", {});
+    external.cornerstoneTools.setToolActiveForElement(mprAxialSeriesElement, "MprMouseWheel", {});
+    external.cornerstoneTools.setToolActiveForElement(mprCoronalSeriesElement, "MprMouseWheel", {});
+    external.cornerstoneTools.setToolActiveForElement(mprSagittalSeriesElement, "MprMouseWheel", {});
+
+    // external.cornerstoneTools.setToolActiveForElement(originalSeriesElement, "Mpr", { mouseButtonMask: 1 });
+    external.cornerstoneTools.setToolActiveForElement(mprAxialSeriesElement, "Mpr", { mouseButtonMask: 1 });
+    external.cornerstoneTools.setToolActiveForElement(mprCoronalSeriesElement, "Mpr", { mouseButtonMask: 1 });
+    external.cornerstoneTools.setToolActiveForElement(mprSagittalSeriesElement, "Mpr", { mouseButtonMask: 1  });
 }
 
 function _setPeerDependencies(){
-    cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
+    cornerstoneWADOImageLoader.external.cornerstone = external.cornerstone;
     cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
-    cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
-    cornerstoneTools.external.cornerstone = cornerstone;
-    cornerstoneTools.external.Hammer = Hammer;
+    external.cornerstoneTools.external.cornerstoneMath = external.cornerstoneMath;
+    external.cornerstoneTools.external.cornerstone = external.cornerstone;
+    external.cornerstoneTools.external.Hammer = Hammer;
 }
 
 function _initWadoImageLoader(){
@@ -90,56 +77,54 @@ function _initWadoImageLoader(){
             }
         }
     };
-    
+
     cornerstoneWADOImageLoader.webWorkerManager.initialize(config);
 }
 
 function _initCornerstoneTools(){
-    cornerstoneTools.init({
+    external.cornerstoneTools.init({
         globalToolSyncEnabled: true
     });
 
     // Grab Tool Classes
-    const WwwcTool = cornerstoneTools.WwwcTool;
-    const PanTool = cornerstoneTools.PanTool;
-    const PanMultiTouchTool = cornerstoneTools.PanMultiTouchTool;
-    const StackScrollMouseWheelTool = cornerstoneTools.StackScrollMouseWheelTool;
-    const ZoomTool = cornerstoneTools.ZoomTool;
-    const ZoomTouchPinchTool = cornerstoneTools.ZoomTouchPinchTool;
-    const ZoomMouseWheelTool = cornerstoneTools.ZoomMouseWheelTool;
+    const WwwcTool = external.cornerstoneTools.WwwcTool;
+    const PanTool = external.cornerstoneTools.PanTool;
+    const PanMultiTouchTool = external.cornerstoneTools.PanMultiTouchTool;
+    const StackScrollMouseWheelTool = external.cornerstoneTools.StackScrollMouseWheelTool;
+    const ZoomTool = external.cornerstoneTools.ZoomTool;
+    const ZoomTouchPinchTool = external.cornerstoneTools.ZoomTouchPinchTool;
+    const ZoomMouseWheelTool = external.cornerstoneTools.ZoomMouseWheelTool;
 
     // Add them
-    cornerstoneTools.addTool(PanTool);
-    cornerstoneTools.addTool(ZoomTool);
-    cornerstoneTools.addTool(WwwcTool);
-    // cornerstoneTools.addTool(MprTool);
-    cornerstoneTools.addTool(PanMultiTouchTool);
-    cornerstoneTools.addTool(StackScrollMouseWheelTool);
-    cornerstoneTools.addTool(ZoomTouchPinchTool);
-    cornerstoneTools.addTool(ZoomMouseWheelTool);
-    cornerstoneTools.addTool(MprMouseWheelTool);
+    external.cornerstoneTools.addTool(PanTool);
+    external.cornerstoneTools.addTool(ZoomTool);
+    external.cornerstoneTools.addTool(WwwcTool);
+    external.cornerstoneTools.addTool(PanMultiTouchTool);
+    external.cornerstoneTools.addTool(StackScrollMouseWheelTool);
+    external.cornerstoneTools.addTool(ZoomTouchPinchTool);
+    external.cornerstoneTools.addTool(ZoomMouseWheelTool);
+    external.cornerstoneTools.addTool(getMprMouseWheelTool());
 
     // Set tool modes
-    cornerstoneTools.setToolActive("Pan", { mouseButtonMask: 4 }); // Middle
-    cornerstoneTools.setToolActive("Zoom", { mouseButtonMask: 2 }); // Right
-    // cornerstoneTools.setToolActive("Wwwc", { mouseButtonMask: 1 }); // Left & Touch
-    cornerstoneTools.setToolActive("PanMultiTouch", {});
-    cornerstoneTools.setToolActive("ZoomTouchPinch", {});
+    external.cornerstoneTools.setToolActive("Pan", { mouseButtonMask: 4 }); // Middle
+    external.cornerstoneTools.setToolActive("Zoom", { mouseButtonMask: 2 }); // Right
+    // external.cornerstoneTools.setToolActive("Wwwc", { mouseButtonMask: 1 }); // Left & Touch
+    external.cornerstoneTools.setToolActive("PanMultiTouch", {});
+    external.cornerstoneTools.setToolActive("ZoomTouchPinch", {});
 }
 
 function _setOriginalSeriesStackState(seriesNumber, originalSeriesElement){
     const seriesImageIds = appState.series[seriesNumber];
-    cornerstoneTools.addStackStateManager(originalSeriesElement, [
+    external.cornerstoneTools.addStackStateManager(originalSeriesElement, [
         'stack'
     ])
-    const allImageIds = seriesImageIds.map(id => getUrlForImageId(id));
 
     const canvasStack = {
         currentImageIdIndex: 0,
-        imageIds: allImageIds,
+        imageIds: seriesImageIds,
     }
 
-    cornerstoneTools.clearToolState(originalSeriesElement, 'stack')
-    cornerstoneTools.addToolState(originalSeriesElement, 'stack', canvasStack)
+    external.cornerstoneTools.clearToolState(originalSeriesElement, 'stack')
+    external.cornerstoneTools.addToolState(originalSeriesElement, 'stack', canvasStack)
 
 }

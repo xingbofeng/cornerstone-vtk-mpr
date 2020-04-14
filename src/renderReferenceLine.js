@@ -1,9 +1,5 @@
-import { import as csTools, toolColors } from 'cornerstone-tools';
+import external from './externalModules.js';
 import calculateReferenceLine from './calculateReferenceLine.js';
-
-const draw = csTools('drawing/draw');
-const drawLine = csTools('drawing/drawLine');
-const convertToVector3 = csTools('util/convertToVectro3');
 
 /**
  * Renders the active reference line.
@@ -17,6 +13,11 @@ const convertToVector3 = csTools('util/convertToVectro3');
  * @param  {Object} [options={}]
  */
 export default function(context, targetElement, targetImagePlane, referenceImagePlane, options = {}) {
+  const draw = external.cornerstoneTools.import('drawing/draw');
+  const drawLine = external.cornerstoneTools.import('drawing/drawLine');
+  const convertToVector3 = external.cornerstoneTools.version[0] === '3' ?
+    external.cornerstoneTools.import('util/convertToVectro3') :
+    external.cornerstoneTools.import('util/convertToVector3');
 
   // Target
   const tRowCosines = convertToVector3(targetImagePlane.rowCosines);
@@ -39,7 +40,7 @@ export default function(context, targetElement, targetImagePlane, referenceImage
   if (angleInRadians < 0.5) {
     const angleInDegrees = angleInRadians * (180 / Math.PI)
     console.warn(`${angleInDegrees} angle is to small for reference lines.`)
-    
+
     return;
   }
 
@@ -52,7 +53,7 @@ export default function(context, targetElement, targetImagePlane, referenceImage
     return;
   }
 
-  const color = options.color || toolColors.getActiveColor();
+  const color = options.color || external.cornerstoneTools.toolColors.getActiveColor();
 
   // Draw the referenceLines
   context.setTransform(1, 0, 0, 1, 0, 0);
@@ -63,7 +64,7 @@ export default function(context, targetElement, targetImagePlane, referenceImage
       targetElement,
       referenceLine.start,
       referenceLine.end,
-      { 
+      {
         color,
         lineWidth: 2
       }

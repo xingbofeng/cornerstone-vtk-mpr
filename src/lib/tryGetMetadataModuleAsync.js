@@ -1,14 +1,12 @@
-import * as cornerstone from 'cornerstone-core';
-import getUrlForImageId from './getUrlForImageId.js';
+import external from './../externalModules.js';
 
 export default async function(metadataModule, imageId){
-    const imageUrl = getUrlForImageId(imageId);
-    let imageMetadata = cornerstone.metaData.get(metadataModule, imageUrl)
+    let imageMetadata = external.cornerstone.metaData.get(metadataModule, imageId)
 
     if(!imageMetadata){
-        await cornerstone.loadAndCacheImage(imageUrl);
-        imageMetadata = cornerstone.metaData.get(metadataModule, imageUrl);
+        await external.cornerstone.loadAndCacheImage(imageId);
+        imageMetadata = external.cornerstone.metaData.get(metadataModule, imageId);
     }
-    
+
     return imageMetadata;
 }
